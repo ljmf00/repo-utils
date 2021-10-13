@@ -1,0 +1,4 @@
+#!/bin/sh -i
+
+vproject-tmux .repo/manifests repo-manifest
+
