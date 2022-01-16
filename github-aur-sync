@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+SOURCE="${BASH_SOURCE[0]}"
+# resolve $SOURCE until the file is no longer a symlink
+while [ -h "$SOURCE" ]; do
+  UTILITY_SCRIPT_FOLDER="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ $SOURCE != /* ]] && SOURCE="$UTILITY_SCRIPT_FOLDER/$SOURCE"
+done
+UTILITY_SCRIPT_FOLDER="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+unset SOURCE
+
+shopt -s dotglob
+find "$UTILITY_SCRIPT_FOLDER/../collab/archlinux/aur/"* -prune -type d | while IFS= read -r d; do
+  (cd "$d"
+    REPO_NAME="$(basename "$d")"
+    echo "Push $REPO_NAME..."
+    if ! git rev-parse --verify --quiet master >/dev/null; then
+      git branch -q master
+    fi
+    if ! git push "git@github.com:ljmf00-aur/$REPO_NAME.git" master:master --no-verify; then
+      echo "!! FAILED --> $REPO_NAME"
+    fi
+  )
+done
