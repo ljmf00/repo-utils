@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+repo sync $(cat .repo/manifests/projects/archlinux.xml | grep "<project" | sed 's|\s<project path=\"\(.*\)|\1|g' | cut -d\" -f1)
